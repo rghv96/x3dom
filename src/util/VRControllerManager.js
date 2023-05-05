@@ -5,7 +5,8 @@ x3dom.VRControllerManager = function ( document )
     this.rightInline    = undefined;
     this.rightTransform = undefined;
     this.wasPresenting  = false;
-    this.modelsAdded    = false;
+    this.leftModelAdded    = false;
+    this.rightModelAdded    = false;
     this._doc = document;
 
     this._controllers = {
@@ -29,7 +30,14 @@ x3dom.VRControllerManager = function ( document )
             scaleFactor : new x3dom.fields.SFVec3f( 1, 1, 1 ),
             offset      : new x3dom.fields.SFVec3f( 0.2, -0.3, -0.3 ),
             axesScale   : [ -1, 1 ]
-        }
+        },
+        "default" : {
+            left        : "https://andreasplesch.github.io/Library/web3d/x3dom/XRControllerViveScaled.x3d",
+            right       : "https://andreasplesch.github.io/Library/web3d/x3dom/XRControllerViveScaled.x3d",
+            scaleFactor : new x3dom.fields.SFVec3f( 40, 40, 40 ),
+            offset      : new x3dom.fields.SFVec3f(),
+            axesScale   : [ 1, 1 ]
+        },
     };
 
     this._addInlines();
@@ -60,26 +68,19 @@ x3dom.VRControllerManager.prototype._addInlines = function ()
 
 x3dom.VRControllerManager.prototype._addControllerModels = function ( controllers )
 {
-    if ( this.modelsAdded )
-    {
-        return;
-    }
-
-    if ( controllers.left )
+    if ( controllers.left && !this.leftModelAdded )
     {
         const url = this._getControllerModelURL( controllers.left.type, "left" );
-
         this.leftInline.setAttribute( "url", url );
+        this.leftModelAdded = true;
     }
 
-    if ( controllers.right )
+    if ( controllers.right && !this.rightModelAdded )
     {
         const url = this._getControllerModelURL( controllers.right.type, "right" );
-
         this.rightInline.setAttribute( "url", url );
+        this.rightModelAdded = true;
     }
-
-    this.modelsAdded = true;
 };
 
 x3dom.VRControllerManager.prototype._getControllerAxesScale = function ( type )
@@ -103,7 +104,7 @@ x3dom.VRControllerManager.prototype._getControllerModelURL = function ( type, si
 {
     if ( this._controllers[ type ] === undefined )
     {
-        return "";
+        return this._controllers[ "default" ][ side ];
     }
 
     return this._controllers[ type ][ side ];
